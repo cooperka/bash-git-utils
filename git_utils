@@ -1,0 +1,161 @@
+#!/bin/bash
+#
+# Common methods for use with git scripts.
+# Open-sourced at https://github.com/cooperka/build-scripts.
+
+BUILD_SCRIPT_VERSION=2.4
+
+# Load custom settings.
+source ./git_utils.cfg
+
+# Perform any initialization and let the user know what's about to happen.
+# @param $@ Description of what's about to happen.
+init() {
+  verify_origin
+
+  echo "$@"
+  prompt 'Continue?'
+
+  print_status "Initializing..."
+  git stash save "WIP before running build script v${BUILD_SCRIPT_VERSION}"
+  git fetch "origin"
+}
+
+# @see init()
+init_with_warning() {
+  echo 'Note: Please stash before continuing. Any existing changes will be lost.'
+  echo 'Note: This is a destructive action! It will delete the online branch.'
+  echo;
+
+  init $1
+}
+
+# Assert that remote `origin` points to the real origin repo.
+verify_origin() {
+  local index_remote="$(git remote -v | grep "${GIT_REPO_FULL_NAME}.git" | cut -f1 | xargs)"
+  if [[ "${index_remote}" != 'origin origin' ]]; then
+    abort_with_message "Remote `origin` must point to ${GIT_REPO_FULL_NAME}."
+  fi
+}
+
+# @param $1 Name of the branch to rebase.
+# @param $2 Name of the branch to rebase on.
+rebase_branch() {
+  print_status "Rebasing $1 on $2..."
+
+  checkout_fresh "$1"
+  git rebase "origin/$2"
+}
+
+# @param $1 Name of the branch to reset.
+# @param $2 Name of the branch to reset to.
+reset_branch() {
+  print_status "Resetting $1 to $2..."
+
+  checkout_fresh "$1"
+  git reset --hard "origin/$2"
+}
+
+# @param $1 Name of the branch to push.
+# @param $2 Extra args, e.g. -f to force push.
+push_branch() {
+  block_push_to_master "$1"
+  print_status "Pushing $1 to origin..."
+
+  git push "origin" "$1" "$2"
+}
+
+# @param $1 version name to push as tag name
+push_tag() {
+  print_status "Pushing tag $1..."
+
+  git tag -f "$1"
+  git push "origin" "$1"
+
+  if [[ "$?" -ne 0 ]]; then
+    abort_with_message 'Failed to push tag (likely already exists on origin).'
+  fi
+}
+
+# @param $1 Name of the branch to checkout and reset.
+checkout_fresh() {
+  print_status "Checking out $1 (will overwrite any local version)..."
+
+  git checkout -B "$1" "origin/$1"
+}
+
+# @param $1 Message to prompt user before waiting for 'y' input
+prompt() {
+  read -p "$1 [yn] " -n 1 -r
+  echo
+  if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+    abort_with_message 'User aborted.'
+  fi
+}
+
+# @param $1 Message to print.
+print_status() {
+  echo;
+  echo "[Build Script] $1"
+}
+
+# @param $1 Name of the branch to push.
+block_push_to_master() {
+  if [[ ${GIT_ALLOW_PUSH_TO_MASTER} != true && "$1" == 'master' ]]; then
+    abort_with_message 'Cannot push to master without review.'
+  fi
+}
+
+# @param $1 Message explaining the error.
+abort_with_message() {
+    echo;
+    echo "Error: $1"
+    exit 1
+}
+
+# @param $1 URL to open
+open_url() {
+  python -mwebbrowser "$1"
+}
+
+# "Cut" a branch, force-pushing the code from the source branch onto the destination branch.
+# Useful for releasing a version of your app and keeping that code somewhere else (to allow easier patch releases when necessary).
+#
+# @param $1 Name of the branch to cut (destination).
+# @param $2 Name of the branch to cut from (source).
+cut_branch() {
+  init_with_warning "About to cut $1 from $2."
+
+  block_push_to_master "$1"
+
+  reset_branch "$1" "$2"
+  push_branch "$1" '-f'
+}
+
+# See cut_branch for description.
+# In addition, bump the version before pushing the branch.
+#
+# @param $1 Name of the branch to cut.
+# @param $2 Name of the branch to cut from.
+# @param $3 Name of new version. Change will be applied by your custom bump_version method.
+cut_branch_with_version_bump() {
+  if ! function_exists 'bump_version'; then
+    abort_with_message '`bump_version` not defined. You must define it yourself in git_utils.cfg.'
+  fi
+
+  block_push_to_master "$1"
+
+  rebase_branch "$1" "$2"
+
+  print_status "Bumping version to $3..."
+  bump_version "$3" "${PWD}"
+
+  push_branch "$1" '-f'
+}
+
+# @param $1 Name of the function to check for.
+# @return true if the specified function exists as a shell function.
+function_exists() {
+  declare -f "$1" > /dev/null
+  return "$?"
+}
