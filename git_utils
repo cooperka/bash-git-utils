@@ -10,7 +10,7 @@ source ./git_utils.cfg
 
 # Perform any initialization and let the user know what's about to happen.
 # @param $@ Description of what's about to happen.
-init() {
+init_safe() {
   verify_origin
 
   echo "$@"
@@ -21,13 +21,13 @@ init() {
   git fetch "origin"
 }
 
-# @see init()
+# @see init_safe()
 init_with_warning() {
   echo 'Note: Please stash before continuing. Any existing changes will be lost.'
   echo 'Note: This is a destructive action! It will delete the online branch.'
   echo;
 
-  init $1
+  init_safe $1
 }
 
 # Assert that remote `origin` points to the real origin repo.
@@ -137,10 +137,10 @@ cut_branch() {
 #
 # @param $1 Name of the branch to cut.
 # @param $2 Name of the branch to cut from.
-# @param $3 Name of new version. Change will be applied by your custom bump_version method.
+# @param $3 Name of new version. Change will be applied by your custom perform_version_bump method.
 cut_branch_with_version_bump() {
-  if ! function_exists 'bump_version'; then
-    abort_with_message '`bump_version` not defined. You must define it yourself in git_utils.cfg.'
+  if ! function_exists 'perform_version_bump'; then
+    abort_with_message '`perform_version_bump` not defined. You must define it yourself in git_utils.cfg.'
   fi
 
   block_push_to_master "$1"
@@ -148,7 +148,7 @@ cut_branch_with_version_bump() {
   rebase_branch "$1" "$2"
 
   print_status "Bumping version to $3..."
-  bump_version "$3" "${PWD}"
+  perform_version_bump "$3" "${PWD}"
 
   push_branch "$1" '-f'
 }
