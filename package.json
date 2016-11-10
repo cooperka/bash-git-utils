@@ -1,8 +1,18 @@
 {
   "name": "bash-git-utils",
   "version": "2.5.0",
-  "description": "Some simple utilities for git-based build/deploy scripts.",
+  "description": "Some simple utility scripts for git-based build/deploy automation.",
   "main": "none",
+  "tags": [
+    "git",
+    "script",
+    "utility",
+    "bash",
+    "shell",
+    "automation",
+    "CI",
+    "CD"
+  ],
   "repository": {
     "url": "git@github.com:cooperka/bash-git-utils.git",
     "type": "git"

@@ -1,6 +1,6 @@
-# git utils
+# bash git utils
 
-Some simple utilities for git-based build/deploy scripts.
+Some simple utility scripts for git-based build/deploy automation.
 
 You can customize these scripts to work with any process you have on your team;
 they're unopinionated and intended to be very flexible.
