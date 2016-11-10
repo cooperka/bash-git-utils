@@ -34,7 +34,7 @@ init_with_warning() {
 verify_origin() {
   local index_remote="$(git remote -v | grep "${GIT_REPO_FULL_NAME}.git" | cut -f1 | xargs)"
   if [[ "${index_remote}" != 'origin origin' ]]; then
-    abort_with_message "Remote `origin` must point to ${GIT_REPO_FULL_NAME}."
+    abort_with_message "Remote \`origin\` must point to ${GIT_REPO_FULL_NAME}."
   fi
 }
 
