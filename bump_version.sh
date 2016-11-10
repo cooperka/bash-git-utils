@@ -21,7 +21,7 @@ source ./git_utils
 init_safe "About to bump version to $1 and commit locally. Any existing tag will be overwritten."
 
 echo;
-perform_version_bump "$1" "${PWD}"
+perform_version_bump "$1" "${PWD}/../.."
 
 tag_string=''
 if [ "$2" ]; then
