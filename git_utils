@@ -24,7 +24,7 @@ init_safe() {
 # @see init_safe()
 init_with_warning() {
   echo 'Note: Please stash before continuing. Any existing changes will be lost.'
-  echo 'Note: This is a destructive action! It will delete the online branch.'
+  echo 'Note: This is a destructive action! It will overwrite the online branch.'
   echo;
 
   init_safe $1
