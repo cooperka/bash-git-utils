@@ -1,0 +1,12 @@
+{
+  "name": "bash-git-utils",
+  "version": "2.5.0",
+  "description": "Some simple utilities for git-based build/deploy scripts.",
+  "main": "none",
+  "repository": {
+    "url": "git@github.com:cooperka/bash-git-utils.git",
+    "type": "git"
+  },
+  "author": "Kevin Cooper <cooperka92@gmail.com>",
+  "license": "MIT"
+}
