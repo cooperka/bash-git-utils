@@ -1,6 +1,7 @@
 {
   "name": "bash-git-utils",
-  "version": "2.5.1",
+  "version": "0.0.1",
+  "private": true,
   "description": "Some simple utility scripts for git-based build/deploy automation.",
   "main": "none",
   "tags": [
