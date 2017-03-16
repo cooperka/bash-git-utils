@@ -25,9 +25,9 @@ perform_version_bump "$1" "${PWD}/../.."
 
 tag_string=''
 if [ "$2" ]; then
-  tag_string="v$1-$2"
+  tag_string="home-v$1-$2"
 else
-  tag_string="v$1"
+  tag_string="home-v$1"
 fi
 
 git tag -f "${tag_string}"
