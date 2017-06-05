@@ -3,7 +3,7 @@
 # Common methods for use with git scripts.
 # Open-sourced at https://github.com/cooperka/build-scripts.
 
-BUILD_SCRIPT_VERSION=2.5.4-home
+BUILD_SCRIPT_VERSION=2.6.0-home
 
 # Load custom settings.
 source ./git_utils.cfg
